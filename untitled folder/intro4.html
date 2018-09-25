@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Document</title>
+</head>
+<body>
+	
+	<!-- use jquery to deal with ajax -->
+
+
+	<script type="text/javascript" src="jquery-2.1.3.min.js"></script>
+	<script type="text/javascript">
+		
+		$.ajax({
+
+			url: 'jquery.php',
+			type: 'POST',
+			data: {username: 'hello'},
+			dataType: 'json',
+			// async: false,
+			success: function(data) { // data == xhr.responseText
+				console.log(data);
+
+				// if add dataType: 'json', it will transfer automatically.
+				// var obj = JSON.parse(data);
+				// console.log(obj);
+			},
+			error: function(err) {
+				console.log(err);
+			}
+		});
+
+		console.log(123);
+
+
+
+
+
+
+	</script>
+</body>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</html>

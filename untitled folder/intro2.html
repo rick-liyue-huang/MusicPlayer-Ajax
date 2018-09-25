@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Document</title>
+	<style type="text/css">
+		div {
+			border: 1px solid #000;
+		}
+	</style>
+</head>
+<body>
+	
+	<!-- this is the second introduction used to mix with ajax -->
+
+	<form action="user.php" method="get">
+		username: <input id="input1" type="text" name="username">
+		<input type="submit" name="" value="register2">
+	</form>
+
+	<div id="div1"></div>
+
+	<script type="text/javascript">
+		
+		var oInput = document.getElementById('input1');
+		var oDiv = document.getElementById('div1');
+
+		oInput.onblur = function() {
+
+			// create ajax
+			var xhr = new XMLHttpRequest();
+			// link with server
+			xhr.open('GET', 'user.php?username=' + encodeURIComponent(this.value), true);
+			
+			// listen the process of ajax application
+			xhr.onreadystatechange = function() {
+				
+				if (xhr.readyState === 4 ) {
+
+					if(xhr.status === 200) {
+						console.log(xhr.responseText);
+						// console.log(JSON.parse(xhr.responseText));
+
+						var obj = JSON.parse(xhr.responseText);
+
+						if (obj.code) {
+							oDiv.innerHTML = obj.message;
+						} else {
+							oDiv.innerHTML = obj.message;
+						}
+					} else {
+
+
+					}
+				}
+
+			};
+
+			xhr.send(null);
+
+		}
+	</script>
+
+
+
+
+
+
+
+
+
+
+</body>
+</html>
