@@ -40,7 +40,7 @@
 			background-size: cover;
 		}
 
-		#list_title {
+		#musicList .list_title {
 			width: 100%;
 			height: 40px;
 			background: rgba(41, 171, 226, 0.6);
@@ -62,14 +62,34 @@
 			top: 12px;
 		}
 
-		#list_content {
+		#musicList .list_content {
 			width: 100%;
 			position: absolute;
-			top: 40px;
+			top: 39px;
 			bottom: 65px;
+			overflow: hidden;
 		}
 
-		#list_audio {
+		#musicList .list_content ul {
+			width: 100%;
+			position: absolute;
+			top: 0;
+			left: 0;
+		}
+
+		#musicList .list_content ul li {
+			width: 100%;
+			height: 60px;
+			background: rgb(26, 26, 26, 0.6);
+			border-bottom: 1px solid #999;
+			box-sizing: border-box;
+		}
+
+		#musicList .list_content ul li.active {
+			border-left: 6px solid #29abe2;
+		}
+
+		#musicList .list_audio {
 			width: 100%;
 			height: 65px;
 			background: url(img/list_audioBg.png) repeat-x;
@@ -118,18 +138,22 @@
 	
 	<div id="main">
 		<div id="musicList">
-			<div id="list_title">Ajax Music Player<span class="list_tip"></span></div>
+			<div id="listTitle" class="list_title">Ajax Music Player<span class="list_tip"></span></div>
 
-			<div id="list_content">
-				<ul>
-					<li>
+			<div id="listContent" class="list_content">
+				<ul id="listContentUl">
+					<!-- <li class="active">
 						<h3 class="title">song name</h3>
 						<p class="name">singer</p>
-					</li>
+					</li> -->
+
+
+					
+
 				</ul>
 			</div>
 
-			<div id="list_audio">
+			<div class="list_audio">
 				<img class="list_audioImg" src="img/miaov.jpg">
 				<div class="list_audioText">
 					<h3 class="title">Simulation</h3>
@@ -148,19 +172,230 @@
 		var viewWidth = $(window).width();
 		var viewHeight = $(window).height();
 		var desWidth = 640;
+
+		// set three variable used to flag the touch method
+		var touchstart = 'touchstart';
+		var touchmove = 'touchmove';
+		var touchend = 'touchend';
+
 		var $main = $('#main');
+		var $listContent = $('listContent');
+
+		var $listContentUl = $('#listContentUl');
+		var $listTitle = $('#listTitle');
+
+
+
 		
 		function device() {
 			// compatible desk and mobile end layout
+
+			// console.log(navigator.userAgent);
+			// through RegExp to confirm is mobile end or pc end.
+			var isMobile = /Mobile/i.test(navigator.userAgent);
+			console.log(isMobile);
+
 			if(viewWidth > desWidth) {
 				
 				$main.css('width', '640px');
 			}
+
+			if(!isMobile) {
+				touchstart = 'mousedown';
+				touchmove = 'mousemove';
+				touchend = 'mouseup';
+			}
 		}
+		
+		// musice list operation by IIFE 
+		var musicList = (function() {
+
+			var musicUrl = 'http://play.google.com';
+			var listUrl = 'musicList.php';
+			
+			// deal with scroll gesture
+			var downY = 0;
+			// the last previous y
+			var preY = 0;
+			var downTop = 0;
+
+			// deal with content height, if list is less than content, donot need scroll.
+			var parentHeight = $listContent.height();
+			var childHeight = $listContentUl.height();
+			var switchHead = true;
+			var switchTail = true;
+
+			// deal with scroll back when touchend.
+			var timer = null;
+			var speed = 0;
+			
+			function init() {  // initiate the musiclist
+				data();
+				bind();
+				moveScroll();
+			}
+
+			function data() { // get data
+				
+				/*
+					here will get the data from backend database by jquery ajax
+				*/
+
+				$.ajax({
+					url: listUrl, // the backend php file
+					type: 'GET',
+					dataType: 'json',
+					success: function(data) {
+						$.each(data, function(k, obj) {
+							// traverse the 'data' and get 'obj' content
+							var $li = '<li><h3 class="title">' + obj.musicName + '</h3><p class="name">' + obj.name + '</p></li>';
+							$listContentUl.append($li);
+						});
+						
+						// prevent asynchronous ajax affect child has no height.
+						childHeight = $listContentUl.height();
+					}
+				});
+			}
+
+			function bind() {
+				// click the 'list_title' to jump to another webpage
+				$listTitle.on(touchstart, function() {
+					// alert(666);
+
+					window.location = musicUrl;
+				});
+			}
+			
+			// scroll the music list 
+			function moveScroll() {
+				
+				// remove the default scroll gesture
+				$(document).on(touchmove, function(ev) {
+					ev.preventDefault();
+				});
+
+				$listContentUl.on(touchstart, function(ev) {
+					
+					// if ul list less than content height, no scroll gesture
+					if(parentHeight > childHeight) {
+						return false;
+					}
+
+					// ev.pageX,  touch.pageX
+
+					// ev.originalEvent -> JQ event to js event
+					// compatible with the pc and mobile 'touch'
+					var touch = ev.originalEvent.changedTouches ? ev.originalEvent.changedTouches[0] : ev;
+					
+					// store the pageY
+					downY = touch.pageY;
+					preY = touch.pageY;
+					downTop = $(this).position().top;
+
+					var self = this;
+
+					switchHead = true;
+					switchTail = true;
+					
+					// remove timer
+					clearInterval(timer);
+
+					// console.log(touch.pageX);
+				
+					$(document).on(touchmove + '.move', function(ev) {
+						var touch = ev.originalEvent.changedTouches ? ev.originalEvent.changedTouches[0] : ev;
+
+						var iTop = $(self).position().top;
+						
+						// get speed value
+						speed = touch.pageY - preY;
+						preY = touch.pageY;
+
+						if(iTop >= 0) {
+							
+							if(switchHead) {
+								switchHead = false;
+								downY = touch.pageY;
+							}
+
+							// touch on the head part of ul list
+							$(self).css('transform', 'translate3d(0,' +( (touch.pageY - downY)/3 + downTop) + 'px, 0');
+
+						} else if(iTop <= parentHeight - childHeight){
+							// touch on the tail part of ul list
+							if(switchTail) {
+								switchTail = false;
+								downY = touch.pageY;
+								$(self).css('transform', 'translate3d(0, ' + ( (touch.pageY - downY)/3 + (parentHeight - childHeight) ) + 'px, 0)');
+							}
+
+						} else {
+							// touch on the center part of ul list
+							$(self).css('transform', 'translate3d(0,' + (touch.pageY - downY + downTop) + 'px, 0');
+						}
+
+						/*$(self).css('transform', 'translate3d(0,' + (touch.pageY - downY + downTop) + 'px, 0');*/
+					});
+
+					$(document).on(touchend + '.move', function(ev) {
+ 						
+ 						// remove the '.move' gesture
+						$(this).off('.move');
+						console.log(speed);
+
+						// remove timer
+						clearInterval(timer);
+
+						timer = setInterval(function() {
+
+							var iTop = $(self).position().top;
+
+							if(Math.abs(speed) <= 0 || iTop > 50 || iTop < parentHeight - childHeight - 50) {
+								clearInterval(timer);
+
+								if(iTop >= 0) {
+									$(self).css('transition', '.2s');
+									$(self).css('transform', 'translate3d(0, 0, 0');
+								} else if(iTop < parentHeight - childHeight) {
+
+									$(self).css('transition', '.2s');
+									$(self).css('transform', 'translate3d(0, ' + (parentHeight - childHeight) +'px, 0');
+								}
+
+							} else {
+
+								
+								speed *= 0.9;
+								$(self).css('transform', 'translate3d(0,' + iTop + speed + 'px, 0');
+							}
+
+							
+
+						}, 60);
+					});
+					
+					// prevent popup 
+					return false;
+
+					$listContentUl.on('transitionend webkitTransitionEnd', function() {
+						// console.log(123);
+						// clear transition
+						$(this).css('transition', '');
+					})
+				});
+			}
+			
+			// provide interface by 'return'
+			return {
+				init: init
+			}
+		})();
 
 		function init() {
 			// the whole project init method
 			device();
+			musicList.init();
 
 		}
 
