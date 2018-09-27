@@ -105,7 +105,29 @@
 			float: left;
 			margin: 7px 0 0 15px;
 		}
-		
+
+		#musicList .list_audioImg.move {
+			animation: 4s linear infinite audioImgMove;
+			-webkit-animation: 4s linear infinite audioImgMove;
+		}
+
+		@keyframes audioImgMove {
+			0% {
+				transform: rotate(0deg);
+			}
+			100% {
+				transform: rotate(360deg);
+			}
+		}
+		@-webkit-keyframes audioImgMove {
+			0% {
+				transform: rotate(0deg);
+			}
+			100% {
+				transform: rotate(360deg);
+			}
+		}
+
 		#musicList .list_audioText {
 			float: left;
 		}
@@ -305,19 +327,19 @@
 				</ul>
 			</div>
 
-			<div class="list_audio">
-				<img class="list_audioImg" src="img/miaov.jpg">
-				<div class="list_audioText">
+			<div id="listAudio" class="list_audio">
+				<img id="listAudioImg" class="list_audioImg" src="img/miaov.jpg">
+				<div id="listAudioText" class="list_audioText">
 					<h3 class="title">Simulation</h3>
 					<p class="name">Music Player</p>
 				</div>
-				<div class="list_audioBtn"></div>
+				<div id="listAudioBtn" class="list_audioBtn"></div>
 			</div>
 		</div>
 
 		<div id="musicDetails">
-			<div class="details_title">
-				<div class="details_name" >music
+			<div id="detailsTitle" class="details_title">
+				<div id="detailsName" class="details_name" >music
 					<span>name</span>
 				</div>
 				<span class="details_tip"></span>
@@ -327,14 +349,14 @@
 			<div class="details_audio">
 				<div class="details_audioAll">
 					<div class="details_audioPro">
-						<div class="details_audioProUp"></div>
-						<div class="details_audioProBar"></div>
+						<div id="detailsAudioProUp" class="details_audioProUp"></div>
+						<div id="detailsAudioProBar" class="details_audioProBar"></div>
 					</div>
-					<div class="details_nowTime">00:00</div>
-					<div class="details_allTime">00:00</div>
-					<div class="details_play"></div>
-					<div class="details_prev"></div>
-					<div class="details_next"></div>
+					<div id="detailsNowTime" class="details_nowTime">00:00</div>
+					<div id="detailsAllTime" class="details_allTime">00:00</div>
+					<div id="detailsPlay" class="details_play"></div>
+					<div id="detailsPrev" class="details_prev"></div>
+					<div id="detailsNext" class="details_next"></div>
 				</div>
 			</div>
 			<ul class="details_btn">
@@ -344,6 +366,8 @@
 		</div>
 
 	</div>
+
+	<audio id="audio1"></audio>
 
 	<script type="text/javascript" src="jquery-2.1.3.min.js"></script>
 	<script type="text/javascript">
@@ -359,17 +383,39 @@
 		var touchmove = 'touchmove';
 		var touchend = 'touchend';
 
+		var id = 0;
+		// 
+		var oAudio = $('#audio1').get(0);
+		// console.log(oAudio);
+
 		var $main = $('#main');
 		var $listContent = $('#listContent');
 
 		var $listContentUl = $('#listContentUl');
 		var $listTitle = $('#listTitle');
+		var $listAudio = $('#listAudio');
+		var $listAudioImg = $('#listAudioImg');
+		var $listAudioText = $('#listAudioText');
+		var $listAudioBtn = $('#listAudioBtn');
+
+		var $musicDetails = $('#musicDetails');
+		var $detailsTitle = $('#detailsTitle');
+		var $detailsName = $('#detailsName');
+		var $detailsAudioProUp = $('#detailsAudioProUp');
+		var $detailsAudioProBar = $('#detailsAudioProBar');
+		var $detailsNowTime = $('#detailsNowTime');
+		var $detailsAllTime = $('#detailsAllTime');
+		var $detailsPlay = $('#detailsPlay');
+		var $detailsPrev = $('#detailsPrev');
+		var $detailsNext = $('#detailsNext');
+
 
 		function init() {
 			// the whole project init method
 			device();
 			musicList.init();
-
+			musicDetails.init();
+			musicAudio.init();
 		}
 
 		
@@ -446,7 +492,7 @@
 					success: function(data) {
 						$.each(data, function(k, obj) {
 							// traverse the 'data' and get 'obj' content
-							var $li = '<li><h3 class="title">' + obj.musicName + '</h3><p class="name">' + obj.name + '</p></li>';
+							var $li = '<li musicId = " ' + (obj.id) +' "><h3 class="title">' + obj.musicName + '</h3><p class="name">' + obj.name + '</p></li>';
 							// append to 'ul' elem
 							$listContentUl.append($li);
 						});
@@ -466,16 +512,32 @@
 				});
 				
 				// by 'delegate' to bind with 'li'
-				if(switchScroll) {
-					
-					// click 'li' to select li
-					$listContentUl.delegate('li', touchend, function() {
+				$listContentUl.delegate('li', touchend, function() {
 
+					if(switchScroll) {
+					
 						// by jquery to remove all siblings 'class' attribute.
 						$(this).attr('class', 'active').siblings().attr('class', '');
-					});
 
-				}
+						// click the li get 'id'
+						id = $(this).attr('musicId');
+
+						// call outside method of 'musicAudio.loadMusic'
+						musicAudio.loadMusic(id);
+					}
+
+					
+				});
+
+				$listAudio.on(touchstart, function() {
+					
+					// after click 'li' list, will produce 'id', and can invoke 'slideUp' event
+					if(id) {
+						musicDetails.slideUp();
+					}
+					
+				})
+				
 			}
 			
 			// scroll the music list 
@@ -609,21 +671,224 @@
 					// prevent popup 
 					return false;
 
-					$listContentUl.on('transitionend webkitTransitionEnd', function() {
-						// console.log(123);
-						// clear transition
-						$(this).css('transition', '');
-					});
 				});
+
+				$listContentUl.on('transitionend webkitTransitionEnd', function() {
+					console.log(123);
+					// clear transition
+					$(this).css('transition', '');
+				});
+			}
+
+
+			// show the music information on the bottom of music list page
+			function show(sName, sMusicName, sImg) {
+				$listAudioImg.attr('src', 'img/'+sImg);
+				$listAudioText.find('h3').html(sMusicName);
+				$listAudioText.find('p').html(sName);
+				$listAudioBtn.show();
 			}
 			
 			// provide interface by 'return'
 			return {
-				init: init
+				init: init,
+				show: show
 			};
 		})();
 
+
+		// music Details page 
+		var musicDetails = (function() {
+
+			function init() {
+				
+				// in the initial stage, the details page is under the bottom.
+				$musicDetails.css('transform', 'translate3d(0, ' + (viewHeight) + 'px, 0)');
+
+				bind();
+			}
+			
+			// the details page slide up when click
+			function slideUp() {
+				$musicDetails.css('transition', '.5s');
+				$musicDetails.css('transform', 'translate3d(0, 0, 0)');
+			}
+			
+			// the details page slide down when click
+			function slideDown() {
+				$musicDetails.css('transform', 'translate3d(0, ' + (viewHeight) + 'px, 0)');
+			}
+
+			function bind() {
+				$detailsTitle.on(touchstart, function() {
+					slideDown();
+				})
+			}
+			
+			// show the music info in the music details page
+			function show(sName, sMusicName, sLyric) {
+
+				// show the title and name in detail page
+				$detailsName.html(sMusicName + ' <span>' + sName + '</span>');
+			}
+
+			return {
+				init: init,
+
+				// 'slideUp' method should be invoked in the 'musicList' function.
+				slideUp: slideUp,
+				show: show
+			};
+
+		})();
 		
+		// music play method
+		var musicAudio = (function() {
+
+			var switchBtn = true;
+			// set timer to call 'playing' method
+			var timer = null;
+			// set proup line
+			var scale = 0;
+			
+			function init() {
+				bind();
+			}
+
+			function loadMusic(id) {
+				// load music
+				$.ajax({
+					url: 'musicAudio.php',
+					type: 'GET',
+					dataType: 'json',
+					data: {
+						id: id
+					},
+					success: function(data) {
+						// console.log(data);
+						show(data);
+					}
+				});
+
+			}
+			
+			/*
+				here 'show' only control the audio 
+
+			*/ 
+			function show(obj) {
+				var sName = obj.name;
+				var sMusicName = obj.musicName;
+				var sLyric = obj.lyric;
+				var sImg = obj.img;
+				var sAudio = obj.audio;
+
+				// console.log(sName, sMusicName, sLyric, sImg, sAudio);
+
+				musicList.show(sName, sMusicName, sImg);
+				musicDetails.show(sName, sMusicName, sLyric);
+				oAudio.src = 'img/' + sAudio;
+				console.log(oAudio);
+				// after load music
+				$(oAudio).on('canplaythrough', function() {
+					play();
+
+					// console.log(formatTime(oAudio.duration));
+
+					$detailsAllTime.html(formatTime(oAudio.duration));
+				});
+
+
+			}
+
+			function play() {
+				
+				switchBtn = false;
+
+				// let image rotate
+				$listAudioImg.addClass('move');
+				// set button as 'pause'
+				$listAudioBtn.css('backgroundImage', 'url(img/list_audioPause.png)');
+
+				// set button on details page
+				$detailsPlay.css('backgroundImage', 'url(img/details_pause.png)');
+
+				// play audio
+				oAudio.play();
+
+				playing();
+
+				clearInterval(timer);
+
+				timer = setInterval(playing, 1000);
+
+				
+
+			}
+
+			function pause() {
+
+				switchBtn = true;
+				// let image rotate
+				$listAudioImg.removeClass('move');
+				// set button as 'pause'
+				$listAudioBtn.css('backgroundImage', 'url(img/list_audioPlay.png)');
+
+				// set play button on details page
+				$detailsPlay.css('backgroundImage', 'url(img/details_play.png)');
+
+				// play audio
+				oAudio.pause();
+				
+				// when pause, clear timer
+				clearInterval(timer);
+			}
+
+			function bind() {
+				// set two elems at the same time.
+				$listAudioBtn.add($detailsPlay).on(touchstart, function() {
+					if(switchBtn) {
+						play();
+					} else {
+						pause();
+					}
+					// avoid click btn to slideup
+					return false;
+				});
+			}
+			
+			// format oAudio.duration (seconds) to (min:sec);
+			function formatTime(num) {
+				num = parseInt(num);
+				var iM = Math.floor(num%3600/60);
+				var iS = Math.floor(num%60);
+
+				return toZero(iM) + ':' + toZero(iS);
+			}
+
+			function toZero(num) { // add zero when less than 10
+				return num = num < 10 ? '0'+num : num;
+			}
+			
+			// when playing, set the playing time and playbar change.
+			function playing() {
+
+				// set the current time as 'detailsNowTime' content
+				$detailsNowTime.html(formatTime(oAudio.currentTime));
+				// set scale
+				scale = oAudio.currentTime / oAudio.duration;
+				
+				// the scale change the position of proup and bar.
+				$detailsAudioProUp.css('width', scale * 100 + '%');
+				$detailsAudioProBar.css('left', scale * 100 + '%');
+			}
+
+			return {
+				init: init,
+				loadMusic: loadMusic
+			};
+
+		})();
 
 		init();
 
