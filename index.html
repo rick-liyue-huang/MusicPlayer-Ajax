@@ -14,6 +14,7 @@
 		html {
 			width: 100%;
 			height: 100%;
+			overflow: hidden;
 		}
 
 		body {
@@ -75,6 +76,7 @@
 			position: absolute;
 			top: 0;
 			left: 0;
+			transform: translate3d(0, 0, 0);
 		}
 
 		#musicList .list_content ul li {
@@ -179,12 +181,17 @@
 		var touchend = 'touchend';
 
 		var $main = $('#main');
-		var $listContent = $('listContent');
+		var $listContent = $('#listContent');
 
 		var $listContentUl = $('#listContentUl');
 		var $listTitle = $('#listTitle');
 
+		function init() {
+			// the whole project init method
+			device();
+			musicList.init();
 
+		}
 
 		
 		function device() {
@@ -194,12 +201,15 @@
 			// through RegExp to confirm is mobile end or pc end.
 			var isMobile = /Mobile/i.test(navigator.userAgent);
 			console.log(isMobile);
-
+			
+			// confirm whether the device is mobile or pc
 			if(viewWidth > desWidth) {
 				
+				// if it is pc, will let the pc device width is 640px
 				$main.css('width', '640px');
 			}
-
+			
+			// mobile 'touch' gesture is different from pc 'touch' gesture, if it is pc device, 'touch' means mouse click.
 			if(!isMobile) {
 				touchstart = 'mousedown';
 				touchmove = 'mousemove';
@@ -207,9 +217,10 @@
 			}
 		}
 		
-		// musice list operation by IIFE 
+		// music list operation by IIFE 
 		var musicList = (function() {
-
+			
+			// set url variable
 			var musicUrl = 'http://play.google.com';
 			var listUrl = 'musicList.php';
 			
@@ -222,19 +233,27 @@
 			// deal with content height, if list is less than content, donot need scroll.
 			var parentHeight = $listContent.height();
 			var childHeight = $listContentUl.height();
+
+			// the switches deal with scroll gesture
+			// head scroll
 			var switchHead = true;
+			// tail scroll
 			var switchTail = true;
+			// click scroll
+			var switchScroll = true;
 
 			// deal with scroll back when touchend.
 			var timer = null;
 			var speed = 0;
 			
+			// set 'init' function
 			function init() {  // initiate the musiclist
 				data();
 				bind();
 				moveScroll();
 			}
-
+			
+			// get data from backend php file
 			function data() { // get data
 				
 				/*
@@ -249,6 +268,7 @@
 						$.each(data, function(k, obj) {
 							// traverse the 'data' and get 'obj' content
 							var $li = '<li><h3 class="title">' + obj.musicName + '</h3><p class="name">' + obj.name + '</p></li>';
+							// append to 'ul' elem
 							$listContentUl.append($li);
 						});
 						
@@ -265,6 +285,18 @@
 
 					window.location = musicUrl;
 				});
+				
+				// by 'delegate' to bind with 'li'
+				if(switchScroll) {
+					
+					// click 'li' to select li
+					$listContentUl.delegate('li', touchend, function() {
+
+						// by jquery to remove all siblings 'class' attribute.
+						$(this).attr('class', 'active').siblings().attr('class', '');
+					});
+
+				}
 			}
 			
 			// scroll the music list 
@@ -274,7 +306,11 @@
 				$(document).on(touchmove, function(ev) {
 					ev.preventDefault();
 				});
+				
+				/*
+					touchstart {touchmove, touchend} three events
 
+				*/ 
 				$listContentUl.on(touchstart, function(ev) {
 					
 					// if ul list less than content height, no scroll gesture
@@ -297,6 +333,7 @@
 
 					switchHead = true;
 					switchTail = true;
+					switchScroll = true;
 					
 					// remove timer
 					clearInterval(timer);
@@ -304,6 +341,10 @@
 					// console.log(touch.pageX);
 				
 					$(document).on(touchmove + '.move', function(ev) {
+						
+						// alert(666);
+						switchScroll = false;
+
 						var touch = ev.originalEvent.changedTouches ? ev.originalEvent.changedTouches[0] : ev;
 
 						var iTop = $(self).position().top;
@@ -320,15 +361,16 @@
 							}
 
 							// touch on the head part of ul list
-							$(self).css('transform', 'translate3d(0,' +( (touch.pageY - downY)/3 + downTop) + 'px, 0');
+							$(self).css('transform', 'translate3d(0,' + (touch.pageY - downY)/3 + 'px, 0');
 
 						} else if(iTop <= parentHeight - childHeight){
 							// touch on the tail part of ul list
 							if(switchTail) {
 								switchTail = false;
 								downY = touch.pageY;
-								$(self).css('transform', 'translate3d(0, ' + ( (touch.pageY - downY)/3 + (parentHeight - childHeight) ) + 'px, 0)');
 							}
+
+							$(self).css('transform', 'translate3d(0, ' + ( (touch.pageY - downY)/3 + (parentHeight - childHeight) ) + 'px, 0)');
 
 						} else {
 							// touch on the center part of ul list
@@ -337,42 +379,52 @@
 
 						/*$(self).css('transform', 'translate3d(0,' + (touch.pageY - downY + downTop) + 'px, 0');*/
 					});
-
+					
+					// here deal with the scroll back effect.
 					$(document).on(touchend + '.move', function(ev) {
  						
  						// remove the '.move' gesture
 						$(this).off('.move');
-						console.log(speed);
+						// console.log(speed);
 
-						// remove timer
-						clearInterval(timer);
+						if(!switchScroll) {
 
-						timer = setInterval(function() {
+							// remove timer
+							clearInterval(timer);
 
-							var iTop = $(self).position().top;
+							timer = setInterval(function() {
 
-							if(Math.abs(speed) <= 0 || iTop > 50 || iTop < parentHeight - childHeight - 50) {
-								clearInterval(timer);
+								var iTop = $(self).position().top;
 
-								if(iTop >= 0) {
-									$(self).css('transition', '.2s');
-									$(self).css('transform', 'translate3d(0, 0, 0');
-								} else if(iTop < parentHeight - childHeight) {
+								if(Math.abs(speed) <= 0 || iTop > 50 || iTop < parentHeight - childHeight - 50) {
+									clearInterval(timer);
 
-									$(self).css('transition', '.2s');
-									$(self).css('transform', 'translate3d(0, ' + (parentHeight - childHeight) +'px, 0');
+									if(iTop >= 0) {
+										$(self).css('transition', '.2s');
+										$(self).css('transform', 'translate3d(0, 0, 0');
+									} else if(iTop <= parentHeight - childHeight) {
+
+										$(self).css('transition', '.2s');
+										$(self).css('transform', 'translate3d(0, ' + (parentHeight - childHeight) +'px, 0');
+									}
+
+								} else {
+
+									
+									speed *= 0.9;
+									$(self).css('transform', 'translate3d(0, ' + iTop + speed + 'px, 0');
 								}
 
-							} else {
-
 								
-								speed *= 0.9;
-								$(self).css('transform', 'translate3d(0,' + iTop + speed + 'px, 0');
-							}
 
-							
+							}, 16);
 
-						}, 60);
+
+
+
+						}
+
+						
 					});
 					
 					// prevent popup 
@@ -382,22 +434,17 @@
 						// console.log(123);
 						// clear transition
 						$(this).css('transition', '');
-					})
+					});
 				});
 			}
 			
 			// provide interface by 'return'
 			return {
 				init: init
-			}
+			};
 		})();
 
-		function init() {
-			// the whole project init method
-			device();
-			musicList.init();
-
-		}
+		
 
 		init();
 
