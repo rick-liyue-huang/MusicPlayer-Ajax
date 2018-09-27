@@ -119,6 +119,156 @@
 			background-size: cover;
 			margin: 16px 15px 0 0;
 		}
+		
+		#musicDetails {
+			width: 100%;
+			height: 100%;
+			background: url(img/detailsBg.jpg) no-repeat;
+			background-size: cover;
+			position: absolute;
+			top: 0;
+			left: 0;
+			z-index: 16;
+			background-position: bottom;
+		}
+
+		#musicDetails .details_title {
+			width: 100%;
+			height: 40px;
+			background: rgba(41, 171, 226, 0.6);
+			font-size: 20px;
+			line-height: 40px;
+			text-align: center;
+			color: white;
+			position: absolute;
+			top: 0;
+		}
+
+		#musicDetails .details_name span {
+			font-size: 12px; 
+		}
+
+		#musicDetails .details_title .details_tip {
+			width: 19px;
+			height: 10px;
+			background: url(img/details_arrow.png) no-repeat;
+			background-size: cover;
+			position: absolute;
+			right: 15px;
+			top: 15px;
+		}
+
+		#musicDetails .details_lyric {
+
+		}
+
+		#musicDetails .details_audio {
+			width: 100%;
+			height: 150px;
+			position: absolute;
+			bottom: 0;
+			/*background-color: green;*/
+		}
+
+		#musicDetails .details_audio .details_audioAll {
+			width: 200px; 
+			margin: 20px auto;
+			position: relative;
+			/*background-color: purple;*/
+		}
+
+		#musicDetails .details_audioPro {
+			width: 100%;
+			height: 2px;
+			background-color: white;
+		}
+
+		#musicDetails .details_audioProUp {
+			width: 0;
+			height: 2px;
+			background-color: #29abe2;
+		}
+
+		#musicDetails .details_audioProBar {
+			width: 15px;
+			height: 15px;
+			background-color: #29abe2;
+			border-radius: 50%;
+			position: absolute;
+			left: 0;
+			top: 0;
+			margin: -6px;
+
+		}
+
+		#musicDetails .details_nowTime {
+			font-size: 12px;
+			color: #b3b3b3;
+			position: absolute;
+			top: -6px;
+			left: -40px; 
+		}
+
+		#musicDetails .details_allTime {
+			font-size: 12px;
+			color: #b3b3b3;
+			position: absolute;
+			top: -6px;
+			right: -40px; 
+		}
+
+		#musicDetails .details_play {
+			width: 55px;
+			height: 55px;
+			background: url(img/details_play.png) no-repeat;
+			background-size: cover;
+			position: absolute;
+			left: 50%;
+			margin-left: -26px;
+			top: 30px;
+		}
+
+		#musicDetails .details_prev {
+			width: 37px;
+			height: 37px;
+			background: url(img/details_prev.png) no-repeat;
+			background-size: cover;
+			position: absolute;
+			left: 12px;
+			top: 39px;
+		}
+
+		#musicDetails .details_next {
+			width: 37px;
+			height: 37px;
+			background: url(img/details_next.png) no-repeat;
+			background-size: cover;
+			position: absolute;
+			right: 12px;
+			top: 39px;
+		}
+
+
+		#musicDetails .details_btn {
+			width: 100%;
+			position: absolute;
+			bottom: 10px;
+			text-align: center;
+		}
+
+		#musicDetails .details_btn li {
+			width: 8px;
+			height: 8px;
+			background-color: #29abe2;
+			border-radius: 5px;
+			display: inline-block; 
+			margin: 3px;
+		}
+
+		#musicDetails .details_btn li.active{
+			width: 21px;
+
+		}
 
 		.title {
 			 color: white;
@@ -164,6 +314,35 @@
 				<div class="list_audioBtn"></div>
 			</div>
 		</div>
+
+		<div id="musicDetails">
+			<div class="details_title">
+				<div class="details_name" >music
+					<span>name</span>
+				</div>
+				<span class="details_tip"></span>
+			</div>
+			<div class="details_lyric"></div>
+
+			<div class="details_audio">
+				<div class="details_audioAll">
+					<div class="details_audioPro">
+						<div class="details_audioProUp"></div>
+						<div class="details_audioProBar"></div>
+					</div>
+					<div class="details_nowTime">00:00</div>
+					<div class="details_allTime">00:00</div>
+					<div class="details_play"></div>
+					<div class="details_prev"></div>
+					<div class="details_next"></div>
+				</div>
+			</div>
+			<ul class="details_btn">
+				<li class="active"></li>
+				<li></li>
+			</ul>
+		</div>
+
 	</div>
 
 	<script type="text/javascript" src="jquery-2.1.3.min.js"></script>
