@@ -382,8 +382,12 @@
 		var touchstart = 'touchstart';
 		var touchmove = 'touchmove';
 		var touchend = 'touchend';
-
+		
+		// search id in database
 		var id = 0;
+
+		// search index in the music list
+		var index = 0;
 		// 
 		var oAudio = $('#audio1').get(0);
 		// console.log(oAudio);
@@ -495,11 +499,17 @@
 							var $li = '<li musicId = " ' + (obj.id) +' "><h3 class="title">' + obj.musicName + '</h3><p class="name">' + obj.name + '</p></li>';
 							// append to 'ul' elem
 							$listContentUl.append($li);
+
+							// console.log(data);
 						});
+
+						console.log($listContentUl);
 						
 						// prevent asynchronous ajax affect child has no height.
 						childHeight = $listContentUl.height();
 					}
+
+
 				});
 			}
 
@@ -524,6 +534,10 @@
 
 						// call outside method of 'musicAudio.loadMusic'
 						musicAudio.loadMusic(id);
+
+						// when click 'li' get the index
+						index = $(this).index();
+						console.log(index);
 					}
 
 					
@@ -750,6 +764,10 @@
 			var timer = null;
 			// set proup line
 			var scale = 0;
+
+			var disX = 0;
+
+			var parentWidth = $detailsAudioProBar.parent().width();
 			
 			function init() {
 				bind();
@@ -788,14 +806,22 @@
 				musicList.show(sName, sMusicName, sImg);
 				musicDetails.show(sName, sMusicName, sLyric);
 				oAudio.src = 'img/' + sAudio;
-				console.log(oAudio);
+				// console.log(oAudio);
 				// after load music
-				$(oAudio).on('canplaythrough', function() {
+				
+				// 'one' avoid bind more than one time
+
+				$(oAudio).one('canplaythrough', function() {
 					play();
 
 					// console.log(formatTime(oAudio.duration));
 
 					$detailsAllTime.html(formatTime(oAudio.duration));
+				});
+				
+				// when play completed, invoke 'ended' event
+				$(oAudio).one('ended', function() {
+					next(); 
 				});
 
 
@@ -843,7 +869,8 @@
 				// when pause, clear timer
 				clearInterval(timer);
 			}
-
+			
+			// 'bind' method used to deal with gesture event
 			function bind() {
 				// set two elems at the same time.
 				$listAudioBtn.add($detailsPlay).on(touchstart, function() {
@@ -855,6 +882,61 @@
 					// avoid click btn to slideup
 					return false;
 				});
+				
+				// 'drag' method compose !!!
+				$detailsAudioProBar.on(touchstart, function(ev) {
+
+					var touch = ev.originalEvent.changedTouches ? ev.originalEvent.changedTouches[0] : ev;
+
+					var self = this;
+
+					disX = touch.pageX - $(this).position().left;
+
+					// console.log(disX);
+					
+					// if we drag the bar, we stop the bar automatic movement.
+					clearInterval(timer);
+
+					$(document).on(touchmove+'.move', function(ev) {
+
+						var touch = ev.originalEvent.changedTouches ? ev.originalEvent.changedTouches[0] : ev;
+						$(self).css('left', touch.pageX - disX);
+
+						// set the range of bar movement
+						var L = touch.pageX - disX;
+						if (L < 0) {
+							L = 0;
+						} else if (L > parentWidth) {
+							L = parentWidth
+						} 
+
+						$(self).css('left', L);
+						scale = L / parentWidth;
+					});
+
+					$(document).on(touchend+'.move', function(ev) {
+						$(this).off('.move');
+
+						// change scale to change currentTime playtime.
+						oAudio.currentTime = scale * oAudio.duration;
+
+						// when startend, continue the bar auto movement
+						playing();
+						clearInterval(timer);
+						timer = setInterval(playing, 1000);
+					});
+
+					return false;
+				});
+
+				$detailsPrev.on(touchstart, function() {
+					prev();
+				});
+
+				$detailsNext.on(touchstart, function() {
+					next();
+				})
+
 			}
 			
 			// format oAudio.duration (seconds) to (min:sec);
@@ -881,6 +963,28 @@
 				// the scale change the position of proup and bar.
 				$detailsAudioProUp.css('width', scale * 100 + '%');
 				$detailsAudioProBar.css('left', scale * 100 + '%');
+			}
+
+			function next() {
+				// play next song
+				var $li = $listContentUl.find('li');
+				// console.log($li);
+				index = index == $li.length - 1 ? 0 : index + 1;
+				console.log(index);
+				id = $li.eq(index).attr('musicId');
+				$li.eq(index).attr('class', 'active').siblings().attr('class', '');
+				loadMusic(id)
+			}
+
+			function prev() {
+				// play previous song
+				// play next song
+				var $li = $listContentUl.find('li');
+
+				index = index == 0 ? $li.length - 1 : index - 1;
+				id = $li.eq(index).attr('musicId');
+				loadMusic(id)
+
 			}
 
 			return {
