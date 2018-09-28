@@ -181,7 +181,26 @@
 		}
 
 		#musicDetails .details_lyric {
+			width: 100%;
+			position: absolute;
+			top: 40px;
+			bottom: 150px;
+			overflow: hidden;
+		}
 
+		#musicDetails .details_lyric ul {
+			width: 100%;
+			text-align: center;
+			color: white;
+			font-size: 16px;
+		}
+
+		#musicDetails .details_lyric ul li {
+			margin-top: 15px;
+		}
+
+		#musicDetails .details_lyric ul li.active {
+			color: #0ff;
 		}
 
 		#musicDetails .details_audio {
@@ -344,7 +363,13 @@
 				</div>
 				<span class="details_tip"></span>
 			</div>
-			<div class="details_lyric"></div>
+
+			<div id="detailsLyric" class="details_lyric">
+				<ul id="detailsLyricUl">
+					<!-- <li>lyric test</li> -->
+					
+				</ul>
+			</div>
 
 			<div class="details_audio">
 				<div class="details_audioAll">
@@ -412,6 +437,9 @@
 		var $detailsPlay = $('#detailsPlay');
 		var $detailsPrev = $('#detailsPrev');
 		var $detailsNext = $('#detailsNext');
+
+		var $detailsLyric = $('#detailsLyric');
+		var $detailsLyricUl = $('#detailsLyricUl');
 
 
 		function init() {
@@ -714,6 +742,11 @@
 		// music Details page 
 		var musicDetails = (function() {
 
+			// use RegExp to discompse the lyric
+			var reg = /\[[^[]+/g;
+			var arr = [];
+			var $li = null;
+
 			function init() {
 				
 				// in the initial stage, the details page is under the bottom.
@@ -744,6 +777,61 @@
 
 				// show the title and name in detail page
 				$detailsName.html(sMusicName + ' <span>' + sName + '</span>');
+				console.log(sLyric);
+				arr = sLyric.match(reg);
+				console.log(arr);
+
+				// transfer to 2d array
+				// [time] and lyric
+
+				for(var i = 0; i < arr.length; i++) {
+					arr[i] = [ formatLyricTime(arr[i].substring(0, 10) ), arr[i].substring(10).trim()];
+				}
+				
+
+				console.log(arr); // 2d array
+				// here arr[i][0] is [time]
+				// arr[i][1] is 'lyric' !!!!!!
+				for(var i = 0; i <arr.length; i++) {
+
+					// append lyric to 'ul'
+					$detailsLyricUl.append('<li>' + arr[i][1] + '</li>');
+				}
+				
+				// find the first 'li' elem
+				$li = $detailsLyricUl.find('li');
+				$li.first().attr('class', 'active');
+				// console.log($li.first());
+			}
+			
+			// transfer [00:00.00] to 'seconds'
+			function formatLyricTime(num) {
+				// console.log(num); // [00:00.00]
+				num = num.substring(1, num.length -1);
+				// console.log(num); // 00:00.00
+
+				var arr = num.split(':');
+				// console.log(arr); // 00, 00.00
+
+				// console.log(( parseFloat(arr[0]*60) + parseFloat(arr[1]) ).toFixed(2));
+				return ( parseFloat(arr[0]*60) + parseFloat(arr[1]) ).toFixed(2);
+
+
+			}
+
+			function scrollLyric(ct) {
+				// console.log(ct);
+				for(var i = 0; i < arr.length; i++) {
+
+					if(i != arr.length - 1 && ct > arr[i][0] && ct < arr[i+1][0]) {
+						$li.eq(i).attr('class', 'active').siblings().attr('class', '');
+					}
+
+					else {
+
+
+					}
+				}
 			}
 
 			return {
@@ -751,7 +839,8 @@
 
 				// 'slideUp' method should be invoked in the 'musicList' function.
 				slideUp: slideUp,
-				show: show
+				show: show,
+				scrollLyric: scrollLyric
 			};
 
 		})();
@@ -963,6 +1052,9 @@
 				// the scale change the position of proup and bar.
 				$detailsAudioProUp.css('width', scale * 100 + '%');
 				$detailsAudioProBar.css('left', scale * 100 + '%');
+				
+				// transfer into the current time
+				musicDetails.scrollLyric(oAudio.currentTime);
 			}
 
 			function next() {
