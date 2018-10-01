@@ -6,6 +6,8 @@
 
 	<title>Music Player</title>
 	<style type="text/css">
+
+	/* the initial layout */
 		* {
 			margin: 0;
 			padding: 0;
@@ -33,6 +35,8 @@
 			position: relative;
 			margin: 0 auto;
 		}
+
+		/* music list page layout */
 
 		#musicList {
 			width: 100%;
@@ -141,6 +145,8 @@
 			background-size: cover;
 			margin: 16px 15px 0 0;
 		}
+
+		/* music detail page layout */
 		
 		#musicDetails {
 			width: 100%;
@@ -186,6 +192,9 @@
 			top: 40px;
 			bottom: 150px;
 			overflow: hidden;
+
+			transition: 0.5s;
+			-webkit-transition: 0.5s;
 		}
 
 		#musicDetails .details_lyric ul {
@@ -214,6 +223,9 @@
 			position: absolute;
 			bottom: 0;
 			/*background-color: green;*/
+
+			transition: 0.5s;
+			-webkit-transition: 0.5s;
 		}
 
 		#musicDetails .details_audio .details_audioAll {
@@ -294,6 +306,59 @@
 			top: 39px;
 		}
 
+		#musicDetails .details_message {
+			width: 80%;
+			position: absolute;
+			top: 40px;
+			bottom: 50px;
+			margin-left: 10%;
+
+			transition: 0.5s;
+			-webkit-transition: 0.5s;
+		}
+
+		#musicDetails .details_message textarea {
+			width: 100%;
+			height: 100px;
+			background: #9babb2;
+			border-radius: 5px;
+			margin-top: 10px;
+		}
+
+		::-webkit-input-placeholder {
+			color: black;
+		}
+		::-moz-webkit-input-placeholder {
+			color: black;
+		}
+
+		#musicDetails .details_message input {
+			width: 100%;
+			height: 30px;
+			color: white;
+			background-color: #29abe2;
+			border-radius: 5px;
+			border: none;
+		}
+
+		#musicDetails .details_message ul {
+			width: 100%;
+			font-size: 12px;
+		}
+
+		#musicDetails .details_message ul li {
+			background-color: rgba(26, 26, 26, 0.6);
+			border-radius: 5px;
+			padding: 10px;
+			color: white;
+			float: left;
+			clear: both;
+			margin-top: 6px;
+
+			transition: 1s;
+			-webkit-transition: 1s;
+		}
+
 
 		#musicDetails .details_btn {
 			width: 100%;
@@ -309,6 +374,9 @@
 			border-radius: 5px;
 			display: inline-block; 
 			margin: 3px;
+
+			transition: 0.5s;
+			-webkit-transition:  0.5s;
 		}
 
 		#musicDetails .details_btn li.active{
@@ -335,9 +403,14 @@
 <body>
 	
 	<div id="main">
-		<div id="musicList">
-			<div id="listTitle" class="list_title">Ajax Music Player<span class="list_tip"></span></div>
 
+		<!-- list page -->
+		<div id="musicList">
+
+			<!-- title part in list page -->
+			<div id="listTitle" class="list_title">Ajax Music Player<span class="list_tip"></span></div>
+			
+			<!-- song list part in list page -->
 			<div id="listContent" class="list_content">
 				<ul id="listContentUl">
 					<!-- <li class="active">
@@ -350,7 +423,8 @@
 
 				</ul>
 			</div>
-
+			
+			<!-- audio play part in list page -->
 			<div id="listAudio" class="list_audio">
 				<img id="listAudioImg" class="list_audioImg" src="img/miaov.jpg">
 				<div id="listAudioText" class="list_audioText">
@@ -360,8 +434,11 @@
 				<div id="listAudioBtn" class="list_audioBtn"></div>
 			</div>
 		</div>
-
+		
+		<!-- detail page -->
 		<div id="musicDetails">
+
+			<!-- Title part in detail page -->
 			<div id="detailsTitle" class="details_title">
 				<div id="detailsName" class="details_name" >music
 					<span>name</span>
@@ -375,8 +452,9 @@
 					
 				</ul>
 			</div>
-
-			<div class="details_audio">
+			
+			<!-- audio play part in detail page -->
+			<div id="detailsAudio" class="details_audio">
 				<div class="details_audioAll">
 					<div class="details_audioPro">
 						<div id="detailsAudioProUp" class="details_audioProUp"></div>
@@ -389,7 +467,20 @@
 					<div id="detailsNext" class="details_next"></div>
 				</div>
 			</div>
-			<ul class="details_btn">
+			
+			<!-- the message part in detail page -->
+			<div id="detailsMessage" class="details_message">
+				<textarea id="detailsMessageText" placeholder="please send your message"></textarea>
+				<input id="detailsMessageBtn" type="button" name="" value="Sumbit">
+				<ul id="detailsMessageUl">
+					<!-- <li>ok</li>
+					<li>good</li>
+					<li>great</li> -->
+				</ul>
+			</div>
+
+			<!-- detail button on the bottom in detail page -->
+			<ul id="detailsBtn" class="details_btn">
 				<li class="active"></li>
 				<li></li>
 			</ul>
@@ -446,6 +537,12 @@
 		var $detailsLyric = $('#detailsLyric');
 		var $detailsLyricUl = $('#detailsLyricUl');
 
+		var $detailsAudio = $('#detailsAudio');
+		var $detailsMessage = $('#detailsMessage');
+		var $detailsMessageText = $('#detailsMessageText');
+		var $detailsMessageBtn = $('#detailsMessageBtn');
+		var $detailsMessageUl = $('#detailsMessageUl');
+ 		var $detailsBtn = $('#detailsBtn');
 
 		function init() {
 			// the whole project init method
@@ -477,6 +574,14 @@
 				touchmove = 'mousemove';
 				touchend = 'mouseup';
 			}
+
+			// set rotating the phone
+			$(window).resize(function() {
+				viewWidth = $(window).width();
+				viewHeight = $(window).height();
+
+				musicDetails.slideDown();
+			});
 		}
 		
 		// music list operation by IIFE 
@@ -753,10 +858,18 @@
 			var $li = null;
 			var iLiHeight = 0;
 
+			var donwX = 0;
+			var rangeX = 20;
+
+			var timer = null;
+
 			function init() {
 				
 				// in the initial stage, the details page is under the bottom.
 				$musicDetails.css('transform', 'translate3d(0, ' + (viewHeight) + 'px, 0)');
+
+				// let message part out of the details page (in the right slide of page)
+				$detailsMessage.css('transform', 'translate3d(' + viewWidth + 'px, 0, 0)');
 
 				bind();
 			}
@@ -770,13 +883,79 @@
 			// the details page slide down when click
 			function slideDown() {
 				$musicDetails.css('transform', 'translate3d(0, ' + (viewHeight) + 'px, 0)');
+				
+				// 
+				$musicDetails.on('transitionend webkitTransitionEnd', function() {
+					
+					// let the lyric load again after click the next song
+					$detailsLyric.add($detailsAudio).css('transform', 'translate3d(0, 0, 0)');
+					$detailsMessage.css('transform', 'translate3d(' + (viewWidth) + 'px, 0, 0)');
+
+					// change back the details button style
+					$detailsBtn.find('li').eq(0).attr('class', 'active').siblings().attr('class', '');
+				});
 			}
 
 			function bind() {
+
 				$detailsTitle.on(touchstart, function() {
 					slideDown();
-				})
+				});
+
+				// slide gesture
+				$musicDetails.on(touchstart, function(ev) {
+					
+					var touch = ev.originalEvent.changedTouches ? ev.originalEvent.changedTouches[0] : ev;
+
+					donwX = touch.pageX;
+
+					$(document).on(touchend+'.move', function(ev) {
+						
+						$(this).off('.move');
+
+						var touch = ev.originalEvent.changedTouches ? ev.originalEvent.changedTouches[0] : ev;
+						// console.log(touch.pageX);
+
+						if(touch.pageX - donwX < -rangeX) {  // slide to left
+
+							// the lyric part and audio part outside the page
+							$detailsLyric.add($detailsAudio).css('transform', 'translate3d(' + (-viewWidth) + 'px, 0, 0)');
+
+							// the message part inside
+							$detailsMessage.css('transform', 'translate3d(0, 0, 0)');
+
+							// change details button style
+							$detailsBtn.find('li').eq(1).attr('class', 'active').siblings().attr('class', '');
+							
+							// when slide left the details page, it will load the message.
+							loadMessage();
+
+
+							// deal with load message
+							clearInterval(timer);
+							timer = setInterval(scrollMessage, 3000);
+
+
+						} else if(touch.pageX - donwX > rangeX  ) { // slide to right
+							$detailsLyric.add($detailsAudio).css('transform', 'translate3d(0, 0, 0)');
+							$detailsMessage.css('transform', 'translate3d(' + (viewWidth) + 'px, 0, 0)');
+
+							// change back the details button style
+							$detailsBtn.find('li').eq(0).attr('class', 'active').siblings().attr('class', '');
+
+							clearInterval(timer);
+						}
+
+					});
+				});
+				
+				// add message
+				$detailsMessageBtn.on(touchstart, function() {
+					addMessage();
+				});
 			}
+			
+			
 			
 			// show the music info in the music details page
 			function show(sName, sMusicName, sLyric) {
@@ -863,12 +1042,75 @@
 					}
 				}
 			}
+			
+			// load message from back end
+			function loadMessage() {
+				$.ajax({
+					url: 'loadMessage.php',
+					type: 'GET',
+					dataType: 'json',
+					data: {
+						mid: id
+					},
+					success: function(data) {
+						// console.log(data);
+						
+						// empty the previous content.
+						$detailsMessageUl.empty();
+
+						$.each(data, function(key, obj) {
+							var $li = $('<li>' + obj.text + '</li>');
+
+							$detailsMessageUl.prepend($li);
+						});
+					}
+
+				});
+			}
+			
+			// add message
+			function addMessage() {
+
+				// get text value input
+				var value = $detailsMessageText.val();
+				$detailsMessageText.val('');
+				$.ajax({
+					
+					url: 'addMessage.php',
+					type: 'POST',
+					dataType: 'json',
+					data: {
+						mid: id,
+						text: value
+					},
+					success: function(data) {
+
+						if(data.code) {
+							var $li = $('<li>' + data.message + '</li>');
+							$detailsMessageUl.prepend($li);
+						}
+					}
+				});
+			}
+			
+			// can scroll message automatically
+			function scrollMessage() {
+				
+				var $lastMesg = $detailsMessageUl.find('li').last();
+				$detailsMessageUl.prepend($lastMesg);
+				$lastMesg.css('opacity', 0);
+
+				setTimeout(function() {
+					$lastMesg.css('opacity', 1);
+				}, 300);
+			}
 
 			return {
 				init: init,
 
 				// 'slideUp' method should be invoked in the 'musicList' function.
 				slideUp: slideUp,
+				slideDown: slideDown,
 				show: show,
 				scrollLyric: scrollLyric
 			};
@@ -901,6 +1143,8 @@
 					data: {
 						id: id
 					},
+					// let iphone can play automatically
+					async: false,
 					success: function(data) {
 						// console.log(data);
 						show(data);
@@ -930,8 +1174,10 @@
 				
 				// 'one' avoid bind more than one time
 
+				play(); // sync for iphone
+
 				$(oAudio).one('canplaythrough', function() {
-					play();
+					// play();
 
 					// console.log(formatTime(oAudio.duration));
 

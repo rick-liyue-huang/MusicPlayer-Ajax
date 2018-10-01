@@ -4,7 +4,7 @@
 	require_once('connect.php');
 
 	// just query 'name' and 'musicName' item from 'music_list' table
-	$sql = "select name, musicName from music_list";
+	$sql = "select id, name, musicName from music_list";
 
 	// get the results 
 	$query = mysql_query($sql);
