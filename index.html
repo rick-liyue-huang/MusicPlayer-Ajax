@@ -778,7 +778,13 @@
 					here will get the data from backend database by jquery ajax
 				*/
 
-				$.ajax({
+				var ajax = null;
+
+				if (ajax) {
+					ajax.abort();
+				}
+
+				ajax = $.ajax({
 					url: listUrl, // the backend php file
 					type: 'GET',
 					dataType: 'json',
@@ -944,8 +950,13 @@
 
 							$loadingLi.remove();
 							$loadingLi = null;
+							
+							var ajax = null;
 
-							$.ajax({
+							if (ajax) {
+								ajax.abort();
+							}
+							ajax = $.ajax({
 
 								url: 'pageMusic.php',
 								type: 'GET',
@@ -1240,7 +1251,13 @@
 			
 			// load message from back end
 			function loadMessage() {
-				$.ajax({
+
+				var ajax = null;
+
+				if(ajax) {
+					ajax.abort();
+				}
+				ajax = $.ajax({
 					url: 'loadMessage.php',
 					type: 'GET',
 					dataType: 'json',
@@ -1269,7 +1286,14 @@
 				// get text value input
 				var value = $detailsMessageText.val();
 				$detailsMessageText.val('');
-				$.ajax({
+
+				var ajax = null;
+
+				if(ajax) {
+					ajax.abort();
+				}
+
+				ajax = $.ajax({
 					
 					url: 'addMessage.php',
 					type: 'POST',
@@ -1331,7 +1355,11 @@
 
 			function loadMusic(id) {
 				// load music
-				$.ajax({
+				var ajax = null;
+				if(ajax) {
+					ajax.abort();
+				}
+				ajax = $.ajax({
 					url: 'musicAudio.php',
 					type: 'GET',
 					dataType: 'json',

@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Document</title>
+	<style type="text/css">
+		.active {
+			background-color: green;
+		}
+	</style>
+</head>
+<body>
+
+	<!-- send data to backend -->
+	<!-- <form action="xhr2.php" method="post" enctype="multipart/form-data">
+		<input type="file" name="file1">
+		<input type="submit" name="">
+	</form> -->
+
+	<!-- <input id="myFile" type="file" name="file1">
+	<input id="mySubmit" type="submit" name="">
+
+	<div id="div1"></div> -->
+
+	<ul>
+		<li>aa</li>
+		<li>bb</li>
+		<li>cc</li>
+	</ul>
+
+	<div id="div1"></div>
+
+	<script type="text/javascript">
+		var aLi = document.getElementsByTagName('li');
+		var oDiv = document.getElementById('div1');
+
+		var xhr = null;
+
+		for(var i = 0; i < aLi.length; i++) {
+
+			aLi[i].index = i;
+			aLi[i].onclick = function() {
+				for(var i = 0; i < aLi.length; i++) {
+					aLi[i].className = '';
+				}
+
+				this.className = 'active';
+
+				
+				if(xhr) {
+					// abort the previous request
+					xhr.abort();
+				}
+				
+				xhr = new XMLHttpRequest();
+			
+				xhr.open('GET', 'xhr2.php?index='+this.index, true);
+
+				xhr.onload = function() {
+
+					if(xhr.status === 200) {
+						// console.log(xhr.response);
+						oDiv.innerHTML = aLi[xhr.response].innerHTML;
+					}
+				};
+
+				xhr.send(null);
+			};
+
+		}
+
+
+	</script>
+
+	<script type="text/javascript">
+
+		/*
+		
+		var oMyFile = document.getElementById('myFile');
+		var oMySubmit = document.getElementById('mySubmit');
+		var oDiv = document.getElementById('div1');
+
+		oMySubmit.onclick = function() {
+
+			var form = new FormData();
+			form.append('file1', oMyFile.files[0]);
+
+			var xhr = new XMLHttpRequest();
+			xhr.open('POST', 'xhr2.php', true);
+			xhr.onload = function() {
+
+				if(xhr.status == 200) {
+					console.log('success');
+					console.log(xhr.response);
+				}
+			};
+			
+			// upload progress
+			xhr.upload.onprogress = function(e) {
+				// current upload progress size
+				console.log(e.loaded);
+				
+				// the total size
+				console.log(e.total);
+
+				oDiv.innerHTML = parseInt(e.loaded / e.total * 100) + '%';
+			}
+
+			xhr.send(form);
+		};
+
+		*/
+	</script>
+
+	<script type="text/javascript">
+		
+		
+		/*
+		var xhr2 = new XMLHttpRequest();
+
+		xhr2.open('GET', 'xhr2.php', true);
+
+		// xhr2.onreadystatechange = function() {
+		// 	console.log(xhr2.readyState);
+		// };
+
+		// xhr2.responseType = 'text';
+		xhr2.responseType = 'json';
+		
+		// onload only invoke on readyState === 4
+		xhr2.onload = function() {
+			console.log(xhr2.readyState); // 4
+
+			if(xhr2.status === 200) {
+				// console.log(JSON.parse(xhr2.responseText));
+				console.log(xhr2.response);
+			}
+		};
+		
+		// set request timeout.
+		xhr2.timeout = 1000;
+		xhr2.ontimeout = function() {
+			console.log('timeout');
+		}
+
+		xhr2.send(null);
+
+		*/
+
+
+
+
+
+
+
+
+
+
+
+
+	</script>
+</body>
+</html>
