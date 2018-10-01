@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Document</title>
+</head>
+<body>
+	
+	<script type="text/javascript" src="../jquery-2.1.3.min.js"></script>
+
+	<script type="text/javascript">
+		
+		// encapsulate the jsonp function
+
+		function getJSONP(url, fn) {
+
+			var oScript = document.createElement('script');
+			var regExp = /callback=([a-z0-9]+)/;
+
+			oScript.src = url;
+			document.body.appendChild(oScript);
+			var arr = url.match(regExp);
+			
+			console.log(arr);
+
+			var fnName = arr[1];
+			console.log(fnName);
+
+			window[fnName] = fn;
+			
+			// invoke completed, and remove the script
+			oScript.onload = function() {
+				document.body.removeChild(oScript);
+				delete window[fnName];
+			}
+		}
+		
+
+		// simulate jquery cross-origin
+		function getJSONPUpdate(url, fn) {
+
+			var oScript = document.createElement('script');
+			var randomStr = 'rick' + (Math.random().toString().replace(/\D/g, ''));
+
+			console.log(randomStr);
+			var regExp = /callback=\?/;
+
+			url = url.replace(regExp, 'callback='+randomStr);
+
+			console.log(url);
+
+			oScript.src = url;
+
+			document.body.appendChild(oScript);
+
+			window[randomStr] = fn;
+
+			oScript.onload = function() {
+				document.body.removeChild(oScript);
+				delete window[randomStr];
+			}
+		}
+
+		document.onclick = function() {
+
+			// getJSONP('jsonp.php?callback=aaa', function(data) {
+			// 	console.log(data);
+			// });
+
+			/*getJSONP('http://127.0.0.1/MusicPlayer-Ajax/intro%20ajax/jsonp.php?callback=aaa', function(data) {
+				console.log(data);
+			});*/
+
+			getJSONPUpdate('http://127.0.0.1/MusicPlayer-Ajax/intro%20ajax/jsonp.php?callback=?', function(data) {
+				console.log(data);
+			});
+			
+			// jquery cross-origin 
+			// $.getJSON('http://127.0.0.1/MusicPlayer-Ajax/intro%20ajax/jsonp.php?callback=?', function(data) {
+			// 	console.log(data);
+			// });
+
+
+		}
+
+		
+
+
+
+
+
+
+
+
+
+
+
+	</script>
+
+	<script type="text/javascript">
+		
+		/*
+		function show(data) {
+			console.log(data);
+		}
+
+		// show({"name": "leo"});
+
+		// dynamic create
+		var oScript = document.createElement('script');
+		// oScript.src = 'jsonp.js';
+		oScript.src = 'jsonp.php';
+		document.body.appendChild(oScript);
+		*/
+	</script>
+	<!-- <script type="text/javascript" src="jsonp.js"></script> -->
+	<script type="text/javascript">
+		
+		/*
+
+		var xhr = new XMLHttpRequest();
+
+		xhr.open('GET', 'http://127.0.0.1/MusicPlayer-Ajax/intro%20ajax/xhr2.php', true);
+
+		xhr.onload = function() {
+
+			if(xhr.status === 200) {
+				console.log(xhr.response);
+			}
+
+
+		};
+
+		xhr.send(null);
+
+
+		*/
+	</script>
+</body>
+</html>
