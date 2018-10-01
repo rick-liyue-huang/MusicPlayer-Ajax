@@ -158,6 +158,7 @@
 			left: 0;
 			z-index: 16;
 			background-position: bottom;
+			overflow: hidden;
 		}
 
 		#musicDetails .details_title {
@@ -384,6 +385,99 @@
 
 		}
 
+		#loading {
+			width: 100%;
+			height: 100%;
+			background-color: black;
+			position: absolute;
+			top: 0;
+			left: 0;
+			z-index: 36;
+		}
+
+		#loading .content1,  #loading .content2 {
+			width: 30px;
+			height: 30px;
+			/*background-color: green;*/
+			position: absolute;
+			left: 50%;
+			top: 50%;
+			margin: -15px;
+		}
+
+		#loading .content1 div, #loading .content2 div {
+			width: 8px;
+			height: 8px;
+			background-color: white;
+			position: absolute;
+			border-radius: 50%;
+
+			animation: 2s linear infinite loadingMove;
+			-webkit-animation: 2s linear infinite loadingMove;
+		}
+
+		#loading .content1 .arc1, #loading .content2 .arc1 {
+			left: 0;
+			top: 0;
+		}
+
+		#loading .content1 .arc2, #loading .content2 .arc2 {
+			top: 0;
+			right: 0;
+		}
+
+		#loading .content1 .arc3, #loading .content2 .arc3 {
+			bottom: 0;
+			right: 0;
+		}
+
+		#loading .content1 .arc4, #loading .content2 .arc4 {
+			bottom: 0;
+			left: 0;
+		}
+
+		#loading .content2 {
+			transform: rotate(45deg);
+			-webkit-transform: rotate(45deg);
+		}
+
+		@keyframes loadingMove {
+			0% {transform: scale(1);}
+			50% {transform: scale(0);}
+			100% {transform: scale(1);}
+		}
+
+		@-webkit-keyframes loadingMove {
+			0% {transform: scale(1);}
+			50% {transform: scale(0);}
+			100% {transform: scale(1);}
+		}
+
+		#loading .content1 .arc1 {
+			animation-delay: -0.1s;
+		}
+		#loading .content2 .arc1 {
+			animation-delay: -0.4s;
+		}
+		#loading .content1 .arc2 {
+			animation-delay: -0.7s;
+		}
+		#loading .content2 .arc2 {
+			animation-delay: -1s;
+		}
+		#loading .content1 .arc3 {
+			animation-delay: -1.3s;
+		}
+		#loading .content2 .arc3 {
+			animation-delay: -1.6s;
+		}
+		#loading .content1 .arc4 {
+			animation-delay: -1.8s;
+		}
+		#loading .content2 .arc4 {
+			animation-delay: -2s;
+		}
+
 		.title {
 			 color: white;
 			 font-size: 15px;
@@ -403,6 +497,23 @@
 <body>
 	
 	<div id="main">
+		
+		<!-- loading part -->
+		<div id="loading">
+			<div class="content1">
+				<div class="arc1"></div>
+				<div class="arc2"></div>
+				<div class="arc3"></div>
+				<div class="arc4"></div>
+			</div>
+
+			<div class="content2">
+				<div class="arc1"></div>
+				<div class="arc2"></div>
+				<div class="arc3"></div>
+				<div class="arc4"></div>
+			</div>
+		</div>
 
 		<!-- list page -->
 		<div id="musicList">
@@ -512,7 +623,8 @@
 		// 
 		var oAudio = $('#audio1').get(0);
 		// console.log(oAudio);
-
+		
+		$loading = $('#loading');
 		var $main = $('#main');
 		var $listContent = $('#listContent');
 
@@ -546,10 +658,45 @@
 
 		function init() {
 			// the whole project init method
+			loading();
 			device();
 			musicList.init();
 			musicDetails.init();
 			musicAudio.init();
+		}
+		
+		// simulate the image loading
+		function loading() {
+			
+			var arr = ['bg.jpg', 'detailsBg.jpg', 'details_pause.png', 'details_play.png', 'details_next.png', 'details_prev.png', 'list_audioBg.png', 'miaov.jpg'];
+
+			var iNum = 0;
+
+			$.each(arr, function(key, img) {
+
+				var objImg = new Image();
+				objImg.onload = function() {
+					iNum++;
+					if(iNum === arr.length) {
+						$loading.animate({
+							opacity: 0
+						}, 1000, function() {
+							$(this).remove();
+						});
+					}
+				};
+
+				objImg.onerror = function() {
+					// 
+					$loading.animate({
+							opacity: 0
+						}, 1000, function() {
+							$(this).remove();
+						});
+				};
+
+				objImg.src = 'img/' + img;
+			});
 		}
 
 		
@@ -612,6 +759,10 @@
 			// deal with scroll back when touchend.
 			var timer = null;
 			var speed = 0;
+
+			var $loadingLi = null;
+			// page used to lazy load
+			var page = 0;
 			
 			// set 'init' function
 			function init() {  // initiate the musiclist
@@ -758,9 +909,17 @@
 
 						} else if(iTop <= parentHeight - childHeight){
 							// touch on the tail part of ul list
+
+							// lazy loading on scroll the page to tail part
+
 							if(switchTail) {
 								switchTail = false;
 								downY = touch.pageY;
+
+								$loadingLi = $('<li style="color: green;">loading....</li>');
+								
+								// add loading li on the tail part. 
+								$(self).append($loadingLi);
 							}
 
 							$(self).css('transform', 'translate3d(0, ' + ( (touch.pageY - downY)/3 + (parentHeight - childHeight) ) + 'px, 0)');
@@ -779,6 +938,42 @@
  						// remove the '.move' gesture
 						$(this).off('.move');
 						// console.log(speed);
+
+						// lazy loading
+						if($loadingLi) { 
+
+							$loadingLi.remove();
+							$loadingLi = null;
+
+							$.ajax({
+
+								url: 'pageMusic.php',
+								type: 'GET',
+								dataType: 'json',
+								// load by page
+								data: {page: page},
+								success: function(data) {
+
+									// console.log(data);
+
+									// data.code === 0;
+									// simulate the new songs
+									$.each(data, function(k, obj) {
+										// traverse the 'data' and get 'obj' content
+										var $li = '<li musicId = " ' + (obj.id) +' "><h3 class="title">' + obj.musicName + '</h3><p class="name">' + obj.name + '</p></li>';
+										// append to 'ul' elem
+										$listContentUl.append($li);
+
+										// console.log(data);
+									});
+									childHeight = $listContentUl.height();
+
+
+									page++;
+								}
+							});
+						}
+
 
 						if(!switchScroll) {
 
