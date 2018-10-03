@@ -10,7 +10,10 @@ Familiar with Ajax application between front end and back end, Here I use jQuery
 
 #### Process
 
-1. create back end environment by MAMP, and put all the project docs inside the htdocs folder under mamp.
+1. create back end environment by MAMP, and put all the project docs inside the htdocs folder under mamp,
+2. create backend files by php code,
+3. create the single page in 'index.html',
+4. which includes all javascript code.
 
 
 
